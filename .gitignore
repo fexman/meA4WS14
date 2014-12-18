@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# But not these files...
+!.gitignore
+!lab4.pdf
+!publicationTypeConstraint.als
+!Form2HTMLGenerator.xtend
+!Form2AlloyGenerator.xtend
+
+# ...even if they are in subdirectories
+!*/
