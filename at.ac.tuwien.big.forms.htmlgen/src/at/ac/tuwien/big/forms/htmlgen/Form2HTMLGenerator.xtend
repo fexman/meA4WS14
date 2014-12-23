@@ -88,14 +88,12 @@ class Form2HTMLGenerator implements IGenerator {
 	}
 	
 	def dispatch JSRegister(CompositeCondition cc) {
-		'''
-		«var String containerId = ''»
-		«IF cc.eContainer instanceof CompositeCondition»
-			«containerId = "'"+(cc as CompositeCondition).conditionID+"'"»
+		'''«IF cc.eContainer instanceof CompositeCondition»
+			form.addCompositeCondition('«cc.conditionID»','«(cc.eContainer as CompositeCondition).conditionID»','«cc.compositionType»');'
 		«ELSE»
-			«containerId = "null"»
+			form.addCompositeCondition('«cc.conditionID»',null,'«cc.compositionType»');'
 		«ENDIF»
-		form.addCompositeCondition('«cc.conditionID»',null,'«cc.compositionType»');'''
+		'''
 	}
 	
 	def dispatch JSRegister(AttributeValueCondition ac) {
