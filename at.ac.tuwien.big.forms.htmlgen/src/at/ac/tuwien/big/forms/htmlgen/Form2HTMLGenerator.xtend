@@ -49,17 +49,17 @@ class Form2HTMLGenerator implements IGenerator {
 				<script type="text/javascript">
 				$(document).ready(
 				function(){				 
-				form.addWelcomeForm('«formModel.forms.findFirst[element | element.welcomeForm].title»');
+				form.addWelcomeForm(' «formModel.forms.findFirst[element | element.welcomeForm].title»');
 				«FOR form : formModel.forms»
 					«FOR page : form.pages»
 						«JSRegister(page)»
 						«IF page.condition != null»
-							«JSRegister(page.condition)»
+							«JSRegister(page.condition, page)»
 						«ENDIF»
 						«FOR pageElement : page.pageElements»
 							«JSRegister(pageElement)»
 							«IF pageElement.condition != null»
-								«JSRegister(pageElement.condition)»
+								«JSRegister(pageElement.condition, pageElement)»
 							«ENDIF»
 						«ENDFOR»
 					«ENDFOR»
@@ -79,25 +79,42 @@ class Form2HTMLGenerator implements IGenerator {
 	
 	def dispatch JSRegister(TextField tf) {
 		'''«IF tf.format != null»
-				form.addRegularExpression('«tf.elementID»','«tf.format»');
+				form.addRegularExpression('«tf.elementID»', '«tf.format»');
 		«ENDIF»'''
 	}
 	
 	def dispatch JSRegister(RelationshipPageElement pe) {
-		'''form.addRelationshipPageElement('«(pe.eContainer as Page).title»','«pe.elementID»','«pe.editingForm.title»','«pe.eClass.getName().toLowerCase()»','«pe.relationship.lowerBound»','«pe.relationship.upperBound»');'''
+		'''form.addRelationshipPageElement('«(pe.eContainer as Page).title»', '«pe.elementID»', '«pe.editingForm.title»', '«pe.eClass.getName().toLowerCase()»', '«pe.relationship.lowerBound»', '«pe.relationship.upperBound»');'''
 	}
 	
-	def dispatch JSRegister(CompositeCondition cc) {
+	def dispatch JSRegister(CompositeCondition cc, Object o) {
 		'''«IF cc.eContainer instanceof CompositeCondition»
-			form.addCompositeCondition('«cc.conditionID»','«(cc.eContainer as CompositeCondition).conditionID»','«cc.compositionType»');'
+			form.addCompositeCondition('«cc.conditionID»','«(cc.eContainer as CompositeCondition).conditionID»','«cc.compositionType»');
 		«ELSE»
-			form.addCompositeCondition('«cc.conditionID»',null,'«cc.compositionType»');'
+			form.addCompositeCondition('«cc.conditionID»',null,'«cc.compositionType»');
+		«ENDIF»
+		«JSRegister(cc.composedConditions.get(0),o)»
+		«JSRegister(cc.composedConditions.get(1),o)»'''
+	}
+	
+	def dispatch JSRegister(AttributeValueCondition ac, Object o) {
+		'''«IF ac.eContainer instanceof CompositeCondition»
+			form.addAttributeValueCondition('«ac.conditionID»',«(ac.eContainer as CompositeCondition).conditionID»,'«AVCContainer(o)»','«ac.value»','«ac.type»');
+		«ELSE»
+			form.addAttributeValueCondition('«ac.conditionID»',null,'«AVCContainer(o)»','«ac.value»','«ac.type»');
 		«ENDIF»
 		'''
 	}
 	
-	def dispatch JSRegister(AttributeValueCondition ac) {
-		//TODO
+	def dispatch AVCContainer(Object o) {
+		//Placeholder, do nothing
 	}
 	
+	def dispatch AVCContainer(Page page) {
+		'''«page.title»'''
+	}
+	
+	def dispatch AVCContainer(PageElement pe) {
+		'''«pe.elementID»'''
+	}
 }
