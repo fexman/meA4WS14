@@ -54,12 +54,12 @@ class Form2HTMLGenerator implements IGenerator {
 					«FOR page : form.pages»
 						«JSRegister(page)»
 						«IF page.condition != null»
-							«JSRegister(page.condition, page)»
+							«JSRegister(page.condition, page, null)»
 						«ENDIF»
 						«FOR pageElement : page.pageElements»
 							«JSRegister(pageElement)»
 							«IF pageElement.condition != null»
-								«JSRegister(pageElement.condition, pageElement)»
+								«JSRegister(pageElement.condition, pageElement, null)»
 							«ENDIF»
 						«ENDFOR»
 					«ENDFOR»
@@ -87,18 +87,18 @@ class Form2HTMLGenerator implements IGenerator {
 		'''form.addRelationshipPageElement('«(pe.eContainer as Page).title»', '«pe.elementID»', '«pe.editingForm.title»', '«pe.eClass.getName().toLowerCase()»', '«pe.relationship.lowerBound»', '«pe.relationship.upperBound»');'''
 	}
 	
-	def dispatch JSRegister(CompositeCondition cc, Object o) {
-		'''«IF cc.eContainer instanceof CompositeCondition»
+	def dispatch JSRegister(CompositeCondition cc, Object o, String parent_id) {
+		'''«IF parent_id != null»
 			form.addCompositeCondition('«cc.conditionID»','«(cc.eContainer as CompositeCondition).conditionID»','«cc.compositionType»');
 		«ELSE»
 			form.addCompositeCondition('«cc.conditionID»',null,'«cc.compositionType»');
 		«ENDIF»
-		«JSRegister(cc.composedConditions.get(0),o)»
-		«JSRegister(cc.composedConditions.get(1),o)»'''
+		«JSRegister(cc.composedConditions.get(0),o,cc.conditionID)»
+		«JSRegister(cc.composedConditions.get(1),o,cc.conditionID)»'''
 	}
 	
-	def dispatch JSRegister(AttributeValueCondition ac, Object o) {
-		'''«IF ac.eContainer instanceof CompositeCondition»
+	def dispatch JSRegister(AttributeValueCondition ac, Object o, String parent_id) {
+		'''«IF parent_id != null»
 			form.addAttributeValueCondition('«ac.conditionID»',«(ac.eContainer as CompositeCondition).conditionID»,'«AVCContainer(o)»','«ac.value»','«ac.type»');
 		«ELSE»
 			form.addAttributeValueCondition('«ac.conditionID»',null,'«AVCContainer(o)»','«ac.value»','«ac.type»');
