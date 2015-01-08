@@ -100,7 +100,7 @@ class Form2HTMLGenerator implements IGenerator {
 						 				<textarea id="«pageElement.elementID»"«IF pageElement.attribute.mandatory» class="mandatory"«ENDIF»></textarea>
 						 			«ENDIF»
 						 			«IF pageElement instanceof SelectionField»
-						 				<select id="«pageElement.elementID»" name="«pageElement.attribute.name»"«IF pageElement.attribute.mandatory» class="mandatory"«ENDIF»/>
+						 				<select id="«pageElement.elementID»" name="«pageElement.attribute.name»"«IF pageElement.attribute.mandatory» class="mandatory"«ENDIF»>
 						 					<option value="default"> </option>
 						 				«IF pageElement.attribute.enumeration != null»
 						 					«FOR literal : pageElement.attribute.enumeration.literals»
