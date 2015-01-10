@@ -46,33 +46,36 @@ class Form2AlloyGenerator implements IGenerator {
 									«var relationship = feature as Relationship»
 										«IF relationship.lowerBound == 0 && relationship.upperBound == 1»
 											«IF relationship.opposite != null»
-												relationship : lone «relationship.opposite.name»
+												«relationship.name» : lone «relationship.opposite.name»
 											«ELSE»
-												relationship : lone «relationship.target.name»
+												«relationship.name» : lone «relationship.target.name»
 											«ENDIF»
 											
 										«ENDIF»
 										«IF relationship.lowerBound == 1 && relationship.upperBound == 1»
 											«IF relationship.opposite != null»
-												relationship : one «relationship.opposite.name»
+												«relationship.name» : one «relationship.opposite.name»
 											«ELSE»
-												relationship : one «relationship.target.name»
+												«relationship.name» : one «relationship.target.name»
 											«ENDIF»
 										«ENDIF»
 										«IF relationship.lowerBound == 0 && relationship.upperBound == -1»
 											«IF relationship.opposite != null»
-												relationship : set «relationship.opposite.name»
+												«relationship.name» : set «relationship.opposite.name»
 											«ELSE»
-												relationship : set «relationship.target.name»
+												«relationship.name» : set «relationship.target.name»
 											«ENDIF»
 										«ENDIF»
 										«IF relationship.lowerBound == 1 && relationship.upperBound == -1»
 											«IF relationship.opposite != null»
-												relationship : some «relationship.opposite.name»
+												«relationship.name» : some «relationship.opposite.name»
 											«ELSE»
-												relationship : some «relationship.target.name»
+												«relationship.name» : some «relationship.target.name»
 											«ENDIF»
 										«ENDIF»
+								«ENDIF»
+								«IF !entity.features.last.equals(feature)»
+									,
 								«ENDIF»
 							«ENDFOR»
 							
