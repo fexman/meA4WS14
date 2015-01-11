@@ -1,7 +1,6 @@
 //add your implemented constraint here
 fact {
-	(all p:Publication |p.type = JA implies one p.journal implies not p.book and not p.proceedings) or
-	(all p:Publication |p.type = BC implies one p.book implies not p.journal and not p.proceedings) or
- 	(all p:Publication |p.type = CP implies one p.proceedings implies not p.book and not p.journal) or
-	(all p:Publication |p.type = WP implies one p.proceedings implies not p.book and not p.journal)
+	(all p:Publication | p.type = JA => no(p.journal - Journal) and no(p.book) and no(p.proceedings)) and 
+	(all p:Publication | p.type = BC => no(p.book - Book) and no(p.journal) and no(p.proceedings)) and 
+	(all p:Publication | (p.type = WP or p.type = CP) => no(p.proceedings - Proceedings) and no(p.book) and no(p.journal))
 }

@@ -13,7 +13,8 @@ import java.util.ArrayList
 
 class Form2AlloyGenerator implements IGenerator {
 
-	var list = new ArrayList<Relationship>();
+	var multiplicityList = new ArrayList<Relationship>();
+	var bidirectionalList = new ArrayList<Relationship>();
 
 	override doGenerate(Resource resource, IFileSystemAccess fsa) {
 
@@ -32,6 +33,7 @@ class Form2AlloyGenerator implements IGenerator {
 						«ENDIF»
 						{
 							«FOR feature : entity.features»
+							
 								«IF feature instanceof Attribute»
 									«var attribute = feature as Attribute»
 										«IF attribute.enumeration == null»
@@ -48,6 +50,7 @@ class Form2AlloyGenerator implements IGenerator {
 											«ENDIF»
 										«ENDIF»
 								«ENDIF»
+								
 								«IF feature instanceof Relationship»
 									«var relationship = feature as Relationship»
 									 «relationship.name» : 
@@ -55,12 +58,15 @@ class Form2AlloyGenerator implements IGenerator {
 									 		«multiplicity(relationship.lowerBound, relationship.upperBound)» «relationship.target.name»
 									 	«ELSE»
 									 		set «relationship.target.name» 
-									 		«addToList(relationship)»
+											«this.addToList(relationship, "multiplicity")»
+									 	«ENDIF»
+									 	«IF relationship.opposite != null»
+											«this.addToList(relationship, "bidirectional")»
 									 	«ENDIF»
 								«ENDIF»
-								«IF !entity.features.last.equals(feature)»
-									,
-								«ENDIF»
+								
+								«IF !entity.features.last.equals(feature)» ,«ENDIF»
+								
 							«ENDFOR»
 							
 						}
@@ -78,13 +84,12 @@ class Form2AlloyGenerator implements IGenerator {
 						}
 					«ENDIF»
 					
-					
-					
-					
 				«ENDFOR»
-				«IF name.equals("courseEntityModel")»
-					«createMultiplicityFact()»
-				«ENDIF»
+				fact {
+				«createMultiplicityFact()»
+				«createBidirectionalFact()»
+				}
+				«this.multiplicityList.clear()»«this.bidirectionalList.clear()»
 			'''
 		)
 
@@ -100,23 +105,38 @@ class Form2AlloyGenerator implements IGenerator {
 		return null;
 	}
 
-	def String addToList(Relationship rel) {
-		this.list.add(rel);
-		return "";
-	}
-
+	/*
+	 *  (all x:Student | all y:Course | y in x.likes implies x in y.isLikedBy) and 
+		(all x:Student | all y:Course | y in x.enrols implies x in y.isEnroledBy) and 
+		(all x:Course | all y:Student | y in x.isEnroledBy implies x in y.enrols) and 
+		(all x:Course | all y:Student | y in x.isLikedBy implies x in y.likes)
+	 */
 	def String createMultiplicityFact() {
 		return '''
-			fact {
-			«FOR rel : this.list»
-				( all z : «rel.opposite.target.name» | #z.«rel.name» >= «rel.lowerBound» ) and
-			«ENDFOR»
-			(all x:Student | all y:Course | y in x.likes implies x in y.isLikedBy) and 
-			(all x:Student | all y:Course | y in x.enrols implies x in y.isEnroledBy) and 
-			(all x:Course | all y:Student | y in x.isEnroledBy implies x in y.enrols) and 
-			(all x:Course | all y:Student | y in x.isLikedBy implies x in y.likes)
-				}
+			«IF this.multiplicityList.length !== 0»
+				«FOR rel : this.multiplicityList»
+					( all z : «rel.opposite.target.name» | #z.«rel.name» >= «rel.lowerBound» ) «IF !this.multiplicityList.last.equals(rel) || this.bidirectionalList.length != 0» and «ENDIF»
+				«ENDFOR»
+				«ENDIF»
 		'''
+	}
+
+	def String createBidirectionalFact() {
+		return '''
+			«IF this.bidirectionalList.length !== 0»
+				«FOR rel : this.bidirectionalList»
+					(all x:«rel.opposite.target.name» | all y:«rel.target.name» | y in x.«rel.name» implies x in y.«rel.opposite.name») «IF !this.bidirectionalList.last.equals(rel)» and «ENDIF»
+				«ENDFOR»
+				«ENDIF»
+		'''
+	}
+
+	def String addToList(Relationship rel, String type) {
+		switch (type) {
+			case "bidirectional": this.bidirectionalList.add(rel)
+			case "multiplicity": this.multiplicityList.add(rel)
+		}
+		return "";
 	}
 
 //	def Boolean checkOpposite(Relationship rel) {
