@@ -86,8 +86,8 @@ class Form2AlloyGenerator implements IGenerator {
 					
 				«ENDFOR»
 				fact {
-				«createMultiplicityFact()»
-				«createBidirectionalFact()»
+					«createMultiplicityFact()»
+					«createBidirectionalFact()»
 				}
 				«this.multiplicityList.clear()»«this.bidirectionalList.clear()»
 			'''
