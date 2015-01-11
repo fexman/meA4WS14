@@ -105,12 +105,6 @@ class Form2AlloyGenerator implements IGenerator {
 		return null;
 	}
 
-	/*
-	 *  (all x:Student | all y:Course | y in x.likes implies x in y.isLikedBy) and 
-		(all x:Student | all y:Course | y in x.enrols implies x in y.isEnroledBy) and 
-		(all x:Course | all y:Student | y in x.isEnroledBy implies x in y.enrols) and 
-		(all x:Course | all y:Student | y in x.isLikedBy implies x in y.likes)
-	 */
 	def String createMultiplicityFact() {
 		return '''
 			«IF this.multiplicityList.length !== 0»
@@ -138,19 +132,4 @@ class Form2AlloyGenerator implements IGenerator {
 		}
 		return "";
 	}
-
-//	def Boolean checkOpposite(Relationship rel) {
-//		var opposite = rel.opposite;
-//		var isOpposite = false;
-//		for (feature : rel.target.features) {
-//			if (feature instanceof Relationship) {
-//				var relationship = feature as Relationship;
-//				if (opposite.equals(relationship)) {
-//					isOpposite = true;
-//				}
-//			}
-//
-//		};
-//		return isOpposite;
-//	}
 }
