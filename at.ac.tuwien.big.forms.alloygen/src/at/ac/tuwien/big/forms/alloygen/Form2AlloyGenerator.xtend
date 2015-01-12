@@ -23,7 +23,6 @@ class Form2AlloyGenerator implements IGenerator {
 		fsa.generateFile(
 			name,
 			'''module ME14
-			
 				«FOR entityModelElement : entityModel.entityModelElements»
 					«IF entityModelElement instanceof Entity»
 						«var entity = entityModelElement as Entity»
@@ -33,7 +32,6 @@ class Form2AlloyGenerator implements IGenerator {
 						«ENDIF»
 						{
 							«FOR feature : entity.features»
-							
 								«IF feature instanceof Attribute»
 									«var attribute = feature as Attribute»
 										«IF attribute.enumeration == null»
@@ -50,7 +48,6 @@ class Form2AlloyGenerator implements IGenerator {
 											«ENDIF»
 										«ENDIF»
 								«ENDIF»
-								
 								«IF feature instanceof Relationship»
 									«var relationship = feature as Relationship»
 									 «relationship.name» : 
@@ -58,32 +55,25 @@ class Form2AlloyGenerator implements IGenerator {
 									 		«multiplicity(relationship.lowerBound, relationship.upperBound)» «relationship.target.name»
 									 	«ELSE»
 									 		set «relationship.target.name» 
-											«this.addToList(relationship, "multiplicity")»
+									 		«this.addToList(relationship, "multiplicity")»
 									 	«ENDIF»
 									 	«IF relationship.opposite != null»
-											«this.addToList(relationship, "bidirectional")»
+									 		«this.addToList(relationship, "bidirectional")»
 									 	«ENDIF»
 								«ENDIF»
-								
 								«IF !entity.features.last.equals(feature)» ,«ENDIF»
-								
 							«ENDFOR»
-							
 						}
 					«ENDIF»
-					
 					«IF entityModelElement instanceof Enumeration»
 						«var enum = entityModelElement as Enumeration»
 						enum «enum.name» {
 							«FOR literal : enum.literals»
 								«literal.name»
-								«IF !enum.literals.last.equals(literal)»	
-									,
-								«ENDIF»
+								«IF !enum.literals.last.equals(literal)»,«ENDIF»
 							«ENDFOR»
 						}
 					«ENDIF»
-					
 				«ENDFOR»
 				fact {
 					«createMultiplicityFact()»
@@ -101,15 +91,21 @@ class Form2AlloyGenerator implements IGenerator {
 		if(lower == 0 && upper == -1) return "set";
 		if(lower == 1 && upper == -1) return "some";
 
-		//all others
+		// all others
 		return null;
+	}
+
+	def String specialMultiplicity(int lower, int upper) {
+		if(upper > lower) return "<=";
+		if(upper == lower) return "=";
+		if(upper < lower) return ">=";
 	}
 
 	def String createMultiplicityFact() {
 		return '''
 			«IF this.multiplicityList.length !== 0»
 				«FOR rel : this.multiplicityList»
-					( all z : «rel.opposite.target.name» | #z.«rel.name» >= «rel.lowerBound» ) «IF !this.multiplicityList.last.equals(rel) || this.bidirectionalList.length != 0» and «ENDIF»
+					( all z : «rel.opposite.target.name» | #z.«rel.name» «this.specialMultiplicity(rel.lowerBound, rel.upperBound)» «rel.lowerBound» ) «IF !this.multiplicityList.last.equals(rel) || this.bidirectionalList.length != 0» and «ENDIF»
 				«ENDFOR»
 				«ENDIF»
 		'''
