@@ -107,8 +107,8 @@ class Form2HTMLGenerator implements IGenerator {
 						 						<option value="«literal.name»">«literal.value»</option>
 						 					«ENDFOR»
 					 					«ELSE»
-						 					<option value="Yes">Yes</option>
-						 					<option value="No">No</option>
+						 					<option value="true">Yes</option>
+						 					<option value="false">No</option>
 						 				«ENDIF»
 						 				</select>
 						 			«ENDIF»
